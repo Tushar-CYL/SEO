@@ -297,7 +297,7 @@ def process_file(file_path, generation_type):
         pd.DataFrame(columns=columns).to_csv(output_path, index=False)
         
         # Process in small batches
-        batch_size = 5  # Reduced batch size for memory constraints
+        batch_size = 3  # Very small batch size for strict memory constraints
         total_rows = 0
         
         # Process CSV or Excel in chunks
@@ -472,11 +472,28 @@ def download_file(filename):
 # Ensure upload directory exists at startup
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Configure for PythonAnywhere
+# Configure for Railway deployment
 if __name__ == '__main__':
-    app.run(debug=False)
+    # Get port from environment variable for Railway compatibility
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
     
 # Add a route to check server health
 @app.route('/health')
 def health_check():
-    return {'status': 'healthy'}, 200
+    memory_info = {}
+    try:
+        import psutil
+        process = psutil.Process(os.getpid())
+        memory_info = {
+            "memory_percent": process.memory_percent(),
+            "memory_info": str(process.memory_info())
+        }
+    except ImportError:
+        memory_info = {"status": "psutil not installed"}
+        
+    return {
+        'status': 'healthy',
+        'memory': memory_info,
+        'environment': 'railway'
+    }, 200
