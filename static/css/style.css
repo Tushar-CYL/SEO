@@ -1,0 +1,122 @@
+/* Main Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Cards */
+.card {
+    border-radius: 10px;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.card-header {
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px !important;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-body {
+    border-radius: 10px;
+}
+
+/* Form Elements */
+.form-control {
+    border-radius: 8px;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    border-color: #86b7fe;
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-lg {
+    padding: 12px 24px;
+}
+
+/* Meta and CTA Text */
+.meta-text, .cta-text {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #0d6efd;
+}
+
+.cta-text {
+    border-left: 4px solid #198754;
+}
+
+/* Footer */
+.footer {
+    margin-top: 50px;
+}
+
+/* Icons */
+.fa-3x {
+    margin-bottom: 20px;
+    color: #0d6efd;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 12px 20px;
+}
+
+.nav-tabs .nav-link.active {
+    border: none;
+    border-bottom: 3px solid #0d6efd;
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    .lead {
+        font-size: 1rem;
+    }
+}
+
+/* Animation for copy button */
+.copy-btn {
+    transition: all 0.3s ease;
+}
+
+/* Loading spinner */
+.spinner-border {
+    width: 1rem;
+    height: 1rem;
+}

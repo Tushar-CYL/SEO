@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}SEO AI Generator - Home{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <h1 class="mb-3">SEO Content Generator</h1>
+                <p class="lead text-muted mb-4">Create optimized meta descriptions and compelling CTAs with AI</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('generate_meta') }}" class="btn btn-primary px-4">
+                        <i class="fas fa-file-alt me-2"></i>Meta Descriptions
+                    </a>
+                    <a href="{{ url_for('generate_cta') }}" class="btn btn-success px-4">
+                        <i class="fas fa-bullhorn me-2"></i>CTAs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Features</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3 text-primary">
+                                <i class="fas fa-magic fa-lg"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">AI-Powered Generation</h6>
+                                <p class="text-muted mb-0 small">Advanced language models for high-quality content</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3 text-primary">
+                                <i class="fas fa-file-csv fa-lg"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Bulk Processing</h6>
+                                <p class="text-muted mb-0 small">Upload CSV or Excel files for batch generation</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3 text-primary">
+                                <i class="fas fa-random fa-lg"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Multiple Variations</h6>
+                                <p class="text-muted mb-0 small">Get three unique options for each entry</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3 text-primary">
+                                <i class="fas fa-download fa-lg"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Easy Export</h6>
+                                <p class="text-muted mb-0 small">Download results as CSV files</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center">
+                <i class="fas fa-file-alt text-primary me-2"></i>
+                <h5 class="mb-0">Meta Description Generator</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Create SEO-optimized meta descriptions that improve click-through rates:</p>
+                <ul class="mb-4 text-muted small">
+                    <li>Character-optimized (120-160 characters)</li>
+                    <li>Keyword-focused content</li>
+                    <li>Compelling and unique descriptions</li>
+                    <li>Three variations to choose from</li>
+                </ul>
+                <a href="{{ url_for('generate_meta') }}" class="btn btn-outline-primary w-100">
+                    Generate Meta Descriptions
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center">
+                <i class="fas fa-bullhorn text-success me-2"></i>
+                <h5 class="mb-0">CTA Generator</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Create compelling calls-to-action that convert visitors:</p>
+                <ul class="mb-4 text-muted small">
+                    <li>Action-oriented language</li>
+                    <li>Persuasive and concise messaging</li>
+                    <li>Keyword integration for relevance</li>
+                    <li>Three variations to choose from</li>
+                </ul>
+                <a href="{{ url_for('generate_cta') }}" class="btn btn-outline-success w-100">
+                    Generate CTAs
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

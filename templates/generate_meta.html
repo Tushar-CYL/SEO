@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Meta Description Generator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-lg">
+            <div class="card-body p-5">
+                <h1 class="text-center mb-4">Meta Description Generator</h1>
+                <p class="lead text-center mb-5">Create SEO-optimized meta descriptions using advanced AI models</p>
+                
+                <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="single-tab" data-bs-toggle="tab" data-bs-target="#single" type="button" role="tab" aria-controls="single" aria-selected="true">Single Entry</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulk" type="button" role="tab" aria-controls="bulk" aria-selected="false">Bulk Upload</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="myTabContent">
+                    <!-- Single Entry Form -->
+                    <div class="tab-pane fade show active" id="single" role="tabpanel" aria-labelledby="single-tab">
+                        <form method="POST" action="{{ url_for('generate_meta') }}">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Content Title</label>
+                                <input type="text" class="form-control" id="title" name="title" required placeholder="Enter the title of your content">
+                            </div>
+                            <div class="mb-3">
+                                <label for="keyword" class="form-label">Target Keyword</label>
+                                <input type="text" class="form-control" id="keyword" name="keyword" required placeholder="Enter your primary keyword">
+                            </div>
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg" id="generateBtn">
+                                    <i class="fas fa-magic me-2"></i>Generate Meta Descriptions
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Bulk Upload Form -->
+                    <div class="tab-pane fade" id="bulk" role="tabpanel" aria-labelledby="bulk-tab">
+                        <div class="file-upload">
+                            <h3>Bulk Upload</h3>
+                            <form method="post" enctype="multipart/form-data" id="uploadForm">
+                                <input type="file" name="file" accept=".csv,.xls,.xlsx" required>
+                                <button type="submit">Upload and Generate</button>
+                            </form>
+                            <div id="processingStatus" style="display: none; margin-top: 20px;">
+                                <p>Processing your file... Please wait.</p>
+                                <div class="progress-bar" style="width: 100%; height: 20px; background-color: #f0f0f0; border-radius: 10px; overflow: hidden;">
+                                    <div id="progressBar" style="width: 0%; height: 100%; background-color: #4CAF50; transition: width 0.5s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                            document.getElementById('uploadForm').onsubmit = function() {
+                                document.getElementById('processingStatus').style.display = 'block';
+                                var progress = 0;
+                                var interval = setInterval(function() {
+                                    progress += 5;
+                                    if (progress <= 90) {
+                                        document.getElementById('progressBar').style.width = progress + '%';
+                                    }
+                                }, 500);
+                            };
+                        </script>
+                        <div class="mb-3">
+                            <div class="form-text">
+                                File must contain columns named 'title' and 'keyword'
+                            </div>
+                        </form>
+                        
+                        <div class="card mt-4 bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-info-circle text-info me-2"></i>File Format Instructions</h5>
+                                <p>Your file should include the following columns:</p>
+                                <ul>
+                                    <li><strong>title</strong> - The content title</li>
+                                    <li><strong>keyword</strong> - The target keyword</li>
+                                </ul>
+                                <p class="mb-0">The generator will add three new columns with unique meta description variations.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const generateBtn = document.getElementById('generateBtn');
+        const form = generateBtn.closest('form');
+        
+        form.addEventListener('submit', function() {
+            generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Generating...';
+            generateBtn.disabled = true;
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}CTA Generator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-lg">
+            <div class="card-body p-5">
+                <h1 class="text-center mb-4">CTA Generator</h1>
+                <p class="lead text-center mb-5">Create compelling calls-to-action that convert visitors into leads and customers</p>
+                
+                <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="single-tab" data-bs-toggle="tab" data-bs-target="#single" type="button" role="tab" aria-controls="single" aria-selected="true">Single Entry</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulk" type="button" role="tab" aria-controls="bulk" aria-selected="false">Bulk Upload</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="myTabContent">
+                    <!-- Single Entry Form -->
+                    <div class="tab-pane fade show active" id="single" role="tabpanel" aria-labelledby="single-tab">
+                        <form method="POST" action="{{ url_for('generate_cta') }}">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Content Title</label>
+                                <input type="text" class="form-control" id="title" name="title" required placeholder="Enter the title of your content">
+                            </div>
+                            <div class="mb-3">
+                                <label for="keyword" class="form-label">Target Keyword</label>
+                                <input type="text" class="form-control" id="keyword" name="keyword" required placeholder="Enter your primary keyword">
+                            </div>
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-success btn-lg" id="generateBtn">
+                                    <i class="fas fa-bullhorn me-2"></i>Generate CTAs
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Bulk Upload Form -->
+                    <div class="tab-pane fade" id="bulk" role="tabpanel" aria-labelledby="bulk-tab">
+                        <form method="POST" action="{{ url_for('generate_cta') }}" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="file" class="form-label">Upload File (CSV, XLS, XLSX)</label>
+                                <input class="form-control" type="file" id="file" name="file" accept=".csv, .xls, .xlsx" required>
+                                <div class="form-text">
+                                    File must contain columns named 'title' and 'keyword'
+                                </div>
+                            </div>
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-upload me-2"></i>Upload and Generate
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="card mt-4 bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-info-circle text-info me-2"></i>File Format Instructions</h5>
+                                <p>Your file should include the following columns:</p>
+                                <ul>
+                                    <li><strong>title</strong> - The content title</li>
+                                    <li><strong>keyword</strong> - The target keyword</li>
+                                </ul>
+                                <p class="mb-0">The generator will add three new columns with unique CTA variations.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const generateBtn = document.getElementById('generateBtn');
+        const form = generateBtn.closest('form');
+        
+        form.addEventListener('submit', function() {
+            generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Generating...';
+            generateBtn.disabled = true;
+        });
+    });
+</script>
+{% endblock %}

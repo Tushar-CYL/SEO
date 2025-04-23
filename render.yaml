@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: seo-ai-generator
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PERPLEXITY_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false

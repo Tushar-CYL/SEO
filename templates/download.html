@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Download Results{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h2 class="mb-0"><i class="fas fa-check-circle me-2"></i>Processing Complete</h2>
+                </div>
+                <div class="card-body text-center">
+                    <div class="alert alert-success mb-4">
+                        <p class="mb-0"><strong>{{ message }}</strong></p>
+                    </div>
+                    
+                    <h3 class="mb-4">Your file is ready for download</h3>
+                    
+                    <div class="mb-4">
+                        <a href="{{ download_url }}" class="btn btn-primary btn-lg" download>
+                            <i class="fas fa-download me-2"></i>Download CSV File
+                        </a>
+                    </div>
+                    
+                    <p class="text-muted">If the download doesn't start automatically, click the button above.</p>
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i>Return to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-click the download button after a short delay
+    window.onload = function() {
+        setTimeout(function() {
+            document.querySelector('a[download]').click();
+        }, 1000);
+    }
+</script>
+{% endblock %}

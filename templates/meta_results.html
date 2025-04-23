@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Meta Description Results{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-lg">
+            <div class="card-body p-5">
+                <h1 class="text-center mb-4">Generated Meta Descriptions</h1>
+                
+                <div class="alert alert-info mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Title:</strong> {{ title }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Keyword:</strong> {{ keyword }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Variation 1: Compelling</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="meta-text mb-2">{{ meta1 }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="text-muted">Character count: {{ meta1|length }}</span>
+                            <button class="btn btn-sm btn-outline-primary copy-btn" data-text="{{ meta1 }}">
+                                <i class="fas fa-copy me-1"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Variation 2: Informative</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="meta-text mb-2">{{ meta2 }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="text-muted">Character count: {{ meta2|length }}</span>
+                            <button class="btn btn-sm btn-outline-success copy-btn" data-text="{{ meta2 }}">
+                                <i class="fas fa-copy me-1"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Variation 3: Question-based</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="meta-text mb-2">{{ meta3 }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="text-muted">Character count: {{ meta3|length }}</span>
+                            <button class="btn btn-sm btn-outline-info copy-btn" data-text="{{ meta3 }}">
+                                <i class="fas fa-copy me-1"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('generate_meta') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Generate Another
+                    </a>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButtons = document.querySelectorAll('.copy-btn');
+        
+        copyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const text = this.getAttribute('data-text');
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+                    this.classList.add('btn-success');
+                    this.classList.remove('btn-outline-primary', 'btn-outline-success', 'btn-outline-info');
+                    
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.classList.remove('btn-success');
+                        if (this.closest('.card-header.bg-primary')) {
+                            this.classList.add('btn-outline-primary');
+                        } else if (this.closest('.card-header.bg-success')) {
+                            this.classList.add('btn-outline-success');
+                        } else {
+                            this.classList.add('btn-outline-info');
+                        }
+                    }, 2000);
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
