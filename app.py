@@ -472,11 +472,9 @@ def download_file(filename):
 # Ensure upload directory exists at startup
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Configure gunicorn for Render
+# Configure for PythonAnywhere
 if __name__ == '__main__':
-    # Get port from environment variable for Render compatibility
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(debug=False)
     
 # Add a route to check server health
 @app.route('/health')
