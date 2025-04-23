@@ -2,10 +2,17 @@ services:
   - type: web
     name: seo-ai-generator
     env: python
+    plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --workers=1 --threads=2 --timeout=120
     envVars:
       - key: PERPLEXITY_API_KEY
         sync: false
       - key: GROQ_API_KEY
         sync: false
+    autoDeploy: true
+    healthCheckPath: /health
+    disk:
+      name: uploads
+      mountPath: /uploads
+      sizeGB: 1

@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 import tempfile
+import gc  # For garbage collection
+import time  # For adding delays
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, session
 from werkzeug.utils import secure_filename
 import langchain
@@ -20,6 +22,7 @@ app.secret_key = os.urandom(24)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'csv', 'xls', 'xlsx'}
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # Limit upload size to 5MB
 
 # API Keys
 PERPLEXITY_API_KEY = os.getenv('PERPLEXITY_API_KEY')
@@ -36,7 +39,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 def search_perplexity(title, keyword):
-    """Search using Perplexity API for additional context"""
+    """Search using Perplexity API for additional context with retry logic"""
     headers = {
         "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
         "Content-Type": "application/json"
@@ -48,16 +51,34 @@ def search_perplexity(title, keyword):
         "options": {"stream": False}
     }
     
-    response = requests.post(
-        "https://api.perplexity.ai/chat/completions",
-        headers=headers,
-        data=json.dumps(data)
-    )
+    # Add retry logic for API stability
+    max_retries = 3
+    retry_delay = 2  # seconds
     
-    if response.status_code == 200:
-        return response.json()['choices'][0]['message']['content']
-    else:
-        return f"Error: {response.status_code}"
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(
+                "https://api.perplexity.ai/chat/completions",
+                headers=headers,
+                data=json.dumps(data),
+                timeout=10  # Add timeout to prevent hanging
+            )
+            
+            if response.status_code == 200:
+                return response.json()['choices'][0]['message']['content']
+            elif response.status_code == 429:  # Rate limit
+                if attempt < max_retries - 1:  # Don't sleep on the last attempt
+                    time.sleep(retry_delay * (attempt + 1))  # Exponential backoff
+                    continue
+            else:
+                return f"Using keyword '{keyword}' for SEO optimization."  # Fallback content
+        except Exception as e:
+            if attempt < max_retries - 1:  # Don't sleep on the last attempt
+                time.sleep(retry_delay * (attempt + 1))
+                continue
+            return f"Using keyword '{keyword}' for SEO optimization."  # Fallback content
+    
+    return f"Using keyword '{keyword}' for SEO optimization."  # Final fallback
 
 def generate_meta_description(title, keyword, target_length=150, style=None):
     """Generate meta description using LLM with character count validation"""
@@ -244,53 +265,97 @@ Output ONLY the CTA text. Do not include any explanations, prefixes, or quotes."
     return cta
 
 def process_file(file_path, generation_type):
-    """Process uploaded file and generate meta descriptions or CTAs"""
+    """Process uploaded file and generate meta descriptions or CTAs with memory optimization"""
     try:
-        # Read the file
+        # Read the file - use chunksize for large files to reduce memory usage
         if file_path.endswith('.csv'):
-            df = pd.read_csv(file_path)
+            # Read only first 10 rows to check columns and create structure
+            df_sample = pd.read_csv(file_path, nrows=10)
         else:
-            df = pd.read_excel(file_path)
+            # Read only first 10 rows to check columns and create structure
+            df_sample = pd.read_excel(file_path, nrows=10)
         
         # Check required columns
-        if 'title' not in df.columns or 'keyword' not in df.columns:
+        if 'title' not in df_sample.columns or 'keyword' not in df_sample.columns:
             return None, "Error: File must contain 'title' and 'keyword' columns."
-        
-        result_df = df.copy()
-        total_rows = len(df)
-        
-        # Process rows
-        if generation_type == 'meta':
-            for i in range(1, 4):
-                result_df[f'Meta Description {i}'] = ''
-            
-            for idx, row in result_df.iterrows():
-                for i in range(1, 4):
-                    meta = generate_meta_description(row['title'], row['keyword'])
-                    result_df.at[idx, f'Meta Description {i}'] = meta
-        else:
-            for i in range(1, 4):
-                result_df[f'CTA {i}'] = ''
-            
-            for idx, row in result_df.iterrows():
-                for i in range(1, 4):
-                    cta = generate_cta_content(row['title'], row['keyword'])
-                    result_df.at[idx, f'CTA {i}'] = cta
-        
-        # Create a unique filename
-        filename = f"{generation_type}_results_{uuid.uuid4().hex[:8]}.csv"
         
         # Create directory for output if it doesn't exist
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
         
-        # Save the file
+        # Create a unique filename
+        filename = f"{generation_type}_results_{uuid.uuid4().hex[:8]}.csv"
         output_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        result_df.to_csv(output_path, index=False)
+        
+        # Process in small batches to reduce memory usage
+        # First create the output file with headers
+        if generation_type == 'meta':
+            columns = ['title', 'keyword', 'Meta Description 1', 'Meta Description 2', 'Meta Description 3']
+        else:
+            columns = ['title', 'keyword', 'CTA 1', 'CTA 2', 'CTA 3']
+            
+        # Create empty output file with headers
+        pd.DataFrame(columns=columns).to_csv(output_path, index=False)
+        
+        # Process in small batches
+        batch_size = 5  # Reduced batch size for memory constraints
+        total_rows = 0
+        
+        # Process CSV or Excel in chunks
+        if file_path.endswith('.csv'):
+            for chunk in pd.read_csv(file_path, chunksize=batch_size):
+                process_chunk(chunk, generation_type, output_path)
+                total_rows += len(chunk)
+        else:
+            # Excel doesn't support chunking directly, so we'll read in small batches
+            excel_file = pd.ExcelFile(file_path)
+            sheet_name = excel_file.sheet_names[0]  # Get first sheet
+            
+            # Get total rows
+            total_excel_rows = excel_file.book.sheet_by_name(sheet_name).nrows - 1  # Subtract header
+            
+            # Process in batches
+            for start_row in range(1, total_excel_rows + 1, batch_size):  # Start from 1 to skip header
+                end_row = min(start_row + batch_size, total_excel_rows + 1)
+                chunk = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=range(1, start_row), nrows=end_row-start_row)
+                
+                # Add headers if this is the first chunk
+                if start_row == 1:
+                    chunk.columns = df_sample.columns
+                    
+                process_chunk(chunk, generation_type, output_path)
+                total_rows += len(chunk)
         
         return filename, f"Successfully processed {total_rows} rows."
-        
     except Exception as e:
         return None, f"Error processing file: {str(e)}"
+
+def process_chunk(chunk, generation_type, output_path):
+    """Process a small chunk of data to reduce memory usage"""
+    # Create a result dataframe for this chunk
+    result_chunk = chunk.copy()
+    
+    # Process each row in the chunk
+    for idx, row in result_chunk.iterrows():
+        title = row['title']
+        keyword = row['keyword']
+        
+        if generation_type == 'meta':
+            # Generate meta descriptions one at a time to reduce memory usage
+            for i in range(1, 4):
+                meta = generate_meta_description(title, keyword)
+                result_chunk.at[idx, f'Meta Description {i}'] = meta
+                # Force garbage collection to free memory
+                gc.collect()
+        else:
+            # Generate CTAs one at a time
+            for i in range(1, 4):
+                cta = generate_cta_content(title, keyword)
+                result_chunk.at[idx, f'CTA {i}'] = cta
+                # Force garbage collection to free memory
+                gc.collect()
+    
+    # Append to the CSV file without loading the whole file into memory
+    result_chunk.to_csv(output_path, mode='a', header=False, index=False)
 
 # Routes
 @app.route('/')
@@ -407,7 +472,13 @@ def download_file(filename):
 # Ensure upload directory exists at startup
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+# Configure gunicorn for Render
 if __name__ == '__main__':
     # Get port from environment variable for Render compatibility
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+    
+# Add a route to check server health
+@app.route('/health')
+def health_check():
+    return {'status': 'healthy'}, 200
